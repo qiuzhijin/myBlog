@@ -1,0 +1,323 @@
+<html>
+<head>
+    <meta charset="utf-8" />﻿
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>使用 frp 实现 Windows 远程桌面连接教程 | 知识海洋</title>
+
+<link rel="shortcut icon" href="https://www.qiuzhijin.tk/blog/favicon.ico?v=1657086197808">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://www.qiuzhijin.tk/blog/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<style>
+    hr {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        border: 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+</style>
+<script>
+	function stop(){
+	return false;
+	}
+	document.ondragstart=stop;
+	document.oncontextmenu=stop;
+	document.οncοpy=stop;
+	document.onselectstart=stop;
+	document.ondragover=stop;
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/blog/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            知识海洋
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/blog/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/blog/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/blog/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/blog/post/about" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="https://www.qiuzhijin.tk/" class="menu gt-a-link">
+                    🌎个人主页
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1657086197808"
+                action="/blog/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    使用 frp 实现 Windows 远程桌面连接教程
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2021-07-06 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h1 id="一-frp-介绍">一、frp 介绍</h1>
+<p>项目地址：https://github.com/fatedier/frp</p>
+<p>FRP (Fast Reverse Proxy) 是一个可用于内网穿透的高性能的反向代理应用，支持 TCP ， UDP ， HTTP ， HTTPS 协议，可以实现 Windows 远程桌面搭建。</p>
+<p>使用体验：搭建好了 frp，用了下远程桌面，发现速度比 AnyDesk 快不少，跟 TeamViewer 差不多，TeamViewer 最近商业化查的越来越严了，明明是自用，也会提醒你商业使用，所以搭建一个 frp 服务器作为替代（备用）还是很有必要的。</p>
+<h1 id="二-准备工作">二、准备工作</h1>
+<p>需要：</p>
+<ul>
+<li>一个有公网 IP 的 VPS 服务器</li>
+</ul>
+<p>如果你需要连接的服务器在国内，那么直接选择阿里云或者腾讯云都行，现在轻量应用服务器价格都非常便宜，学生的话更是几十块钱 / 年就能买到 5M 带宽的轻量，用来做远程连接完全够了。</p>
+<p>学生优惠：</p>
+<ul>
+<li>腾讯云学生：https://cloud.tencent.com/act/campus</li>
+<li>阿里云学生：https://developer.aliyun.com/plan/grow-up</li>
+</ul>
+<p>其他优惠：</p>
+<ul>
+<li>腾讯云秒杀：https://cloud.tencent.com</li>
+<li>阿里云云小站：https://www.aliyun.com/minisite/goods</li>
+</ul>
+<h1 id="三-frp-服务器端搭建">三、frp 服务器端搭建</h1>
+<p>下载地址：https://github.com/fatedier/frp/releases</p>
+<p>一般服务器都是 Linux 系统的，目前最新版本是 0.36.2，直接下载对应的版本：<br>
+<code>wget https://github.com/fatedier/frp/releases/download/v0.36.2/frp_0.36.2_linux_amd64.tar.gz</code></p>
+<p>解压：</p>
+<p><code>tar -zxvf frp_0.36.2_linux_amd64.tar.gz</code><br>
+至此，你会得到一个<code> frp_0.36.2_linux_amd64</code> 的文件夹，进入文件夹：</p>
+<p><code>cd frp_0.36.2_linux_amd64</code></p>
+<p>作为服务器端，你只需要关心 2 个文件：</p>
+<ul>
+<li>frps</li>
+<li>frps.ini<br>
+其中 frps 是运行程序，frps.ini 是配置文件。</li>
+</ul>
+<p>修改 frps.ini ：</p>
+<p><code>vi frps.ini</code><br>
+文件内容如下：</p>
+<pre><code class="language-[common]">bind_port = 7000
+dashboard_port = 7500
+token = token
+dashboard_user = user
+dashboard_pwd = pwd
+</code></pre>
+<p>这里主要是配置了绑定的端口（7000），控制面板的端口（7500），token（会在客户端用到），控制面板的 user 用户名和 pwd 密码。</p>
+<p>运行 frp 客户端：<br>
+<code>./frps -c frps.ini</code></p>
+<p>如果没有问题的话，就会直接运行成功了：<br>
+<code>frps started successfully</code><br>
+通过（http://152.67.<em>.</em>:7500）可以访问控制面板了。</p>
+<p>可以借助 nohup 后台运行 frps，命令如下：<br>
+<code>nohup ./frps -c frps.ini &gt; /root/frp/log.log 2&gt;&amp;1 &amp;</code></p>
+<p><strong>通过systemcl设置开机自启动</strong><br>
+将frps注册为系统服务</p>
+<pre><code>[root@frp_server ~]# vim /usr/lib/systemd/system/frps.service
+[Unit]
+Description=frp server
+After=network.target
+
+[Service]
+Type=simple
+
+ExecStart=/usr/local/frp_server/frps -c /usr/local/frp_server/frps.ini
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s QUIT $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+[root@frp_server ~]# systemctl enable frps
+</code></pre>
+<pre><code>[root@frp_server ~]# systemctl start  frps.service
+[root@frp_server ~]# systemctl status frps
+ frps.service - frp server
+   Loaded: loaded (/usr/lib/systemd/system/frps.service; disabled; vendor preset: disabled)
+   Active: active (running) since Tue 2018-09-25 17:47:44 CST; 20s ago
+ Main PID: 4168 (frps)
+   CGroup: /system.slice/frps.service
+           └─4168 /usr/local/frp_server/frps -c /usr/local/frp_server/frps.ini
+
+Sep 25 17:47:44 frp_server systemd[1]: Started frp server.
+Sep 25 17:47:44 frp_server systemd[1]: Starting frp server...
+</code></pre>
+<h1 id="四-frp-客户端配置">四、frp 客户端配置</h1>
+<p>下载地址：https://github.com/fatedier/frp/releases</p>
+<p>同样是下载 releases，以 Windows 为例，下载与服务器端对应版本的 frp_0.36.2_windows_amd64.zip。</p>
+<p>作为客户端端，你只需要关心 2 个文件：</p>
+<ul>
+<li>frpc</li>
+<li>frpc.ini<br>
+编辑 <code>frpc.ini </code>文件，加入如下内容：</li>
+</ul>
+<pre><code class="language-[common]">server_addr = 152.67.*.*
+server_port = 7000
+token = token
+[rdp]
+type = tcp
+local_ip = 127.0.0.1
+local_port = 3389
+remote_port = 7001
+[smb]
+type = tcp
+local_ip = 127.0.0.1
+local_port = 445
+remote_port = 7002
+</code></pre>
+<p>“server_addr”是服务端 IP 地址，填入即可，“server_port”为服务器端口，即 bind_port 的值，“token”是你在服务器上设置的连接口令。</p>
+<p>这里用到了 2 个自定义规则，一个是 rdp，一个是 smb：</p>
+<ul>
+<li>RDP，即 Remote Desktop 远程桌面，Windows 的 RDP 默认端口是 3389，协议为 TCP，本条规则可以实现远程桌面连接。</li>
+<li>SMB，即 Windows 文件共享所使用的协议，默认端口号 445，协议 TCP，本条规则可实现远程文件访问。<br>
+打开 cmd，进入 frp 的目录，执行如下命令运行 frp 客户端（不能双击 frpc.exe）：<br>
+<code>frpc -c frpc.ini</code><br>
+结果如下所示：</li>
+</ul>
+<pre><code class="language-C:\Users\Administrator\frp_0.37.0_windows_amd64&gt;frpc">2021/07/06 08:40:09 [I] [service.go:304] [bb69e2195d1e242d] login to server success, get run id [bb69e2195d1e242d], server udp port [0]
+2021/07/06 08:40:09 [I] [proxy_manager.go:144] [bb69e2195d1e242d] proxy added: [rdp smb ssh]
+2021/07/06 08:40:09 [I] [control.go:180] [bb69e2195d1e242d] [rdp] start proxy success
+2021/07/06 08:40:09 [I] [control.go:180] [bb69e2195d1e242d] [smb] start proxy success
+2021/07/06 08:40:09 [I] [control.go:180] [bb69e2195d1e242d] [ssh] start proxy success
+</code></pre>
+<p>之后开启 Windows 远程访问：Windows 开启远程访问，直接直接在本地远程连接即可，地址就是 152.67.<em>.</em>:7001 （服务器 IP 和绑定的端口），之后输入用户名和密码就能成功远程了。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://www.qiuzhijin.tk/blog/post/rF02ORZs9/" class="post-title gt-a-link">
+                    蒸发波导南海观测航次即将杨帆起航-“东方红3”
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">知识海洋</div>
+    <div class="social-container">
+        
+            
+                <a href="https://github.com/qiuzhijin" target="_blank">
+                    <i class="fab fa-github gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+                <a href="http://weibo.com/qiuzhijin/" target="_blank">
+                    <i class="fab fa-weibo gt-c-content-color-first"></i>
+                </a>
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        <p>Copyright <a target="_blak"
+               class="peointr"
+               href="http://www.qiuzhijin.tk/"
+               title="个人主页"
+               style="color: gray">&copy;</a> 2015-2021 Zhijin Qiu.</p>
+          <p>All rights reserved.</p>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://www.qiuzhijin.tk/blog/atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
